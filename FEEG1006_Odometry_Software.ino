@@ -9,6 +9,7 @@
 
 void setup()
 {
+	Wire.begin();			// Begin i2c wire
 
 
 }

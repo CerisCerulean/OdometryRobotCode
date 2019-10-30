@@ -14,9 +14,64 @@
 
 
 
-class MD25
+class MD25Controller
 {
 public:
+
+	// Default Empty Constructor
+	MD25Controller() {}
+
+	// Full Register Constructor for MD25Controller
+	MD25Controller
+	(
+	uint8_t i_Speed1Reg = 0x00,
+	uint8_t i_Speed2Reg = 0x01,
+
+	uint8_t i_Enc1aReg = 0x02,
+	uint8_t i_Enc1bReg = 0x03,
+	uint8_t i_Enc1cReg = 0x04,
+	uint8_t i_Enc1dReg = 0x05,
+
+	uint8_t i_Enc2aReg = 0x06,
+	uint8_t i_Enc2bReg = 0x07,
+	uint8_t i_Enc2cReg = 0x08,
+	uint8_t i_Enc2dReg = 0x09,
+
+	uint8_t i_VoltageReg = 0x0A,
+	uint8_t i_Motor1CurrentReg = 0x0B,
+	uint8_t i_Motor2CurrentReg = 0x0C,
+
+	uint8_t i_SoftwareReg = 0x0D,
+
+	uint8_t i_AccelerationReg = 0x0E,
+
+	uint8_t i_ModeReg = 0x10
+	): 
+		m_Speed1Reg(i_Speed1Reg),
+		m_Speed2Reg(i_Speed2Reg),
+
+		m_Enc1aReg(i_Enc1aReg),
+		m_Enc1bReg(i_Enc1bReg),
+		m_Enc1cReg(i_Enc1cReg),
+		m_Enc1dReg(i_Enc1dReg),
+
+		m_Enc2aReg(i_Enc2aReg),
+		m_Enc2bReg(i_Enc2bReg),
+		m_Enc2cReg(i_Enc2cReg),
+		m_Enc2dReg(i_Enc2dReg),
+
+		m_VoltageReg(i_VoltageReg),
+		m_Motor1CurrentReg(i_Motor1CurrentReg),
+		m_Motor2CurrentReg(i_Motor2CurrentReg),
+
+		m_SoftwareReg(i_SoftwareReg),
+
+		m_AccelerationReg(i_AccelerationReg),
+
+		m_ModeReg(i_ModeReg)
+	{}
+
+
 	float GetBatteryVoltage();
 
 	float GetMotorCurrent(int i_Index);
@@ -32,28 +87,29 @@ private:
 	const unsigned char m_MD25Address{ 0x58 };
 
 	// Memory Registers in MD25 with default values from datasheet
-	const unsigned char m_Speed1Reg{ 0x00 };
-	const unsigned char m_Speed2Reg{ 0x01 };
 
-	const unsigned char m_Enc1aReg{ 0x02 };
-	const unsigned char m_Enc1bReg{ 0x03 };
-	const unsigned char m_Enc1cReg{ 0x04 };
-	const unsigned char m_Enc1dReg{ 0x05 };
+	const uint8_t m_Speed1Reg{ 0x00 };
+	const uint8_t m_Speed2Reg{ 0x01 };
 
-	const unsigned char m_Enc2aReg{ 0x06 };
-	const unsigned char m_Enc2bReg{ 0x07 };
-	const unsigned char m_Enc2cReg{ 0x08 };
-	const unsigned char m_Enc2dReg{ 0x09 };
+	const uint8_t m_Enc1aReg{ 0x02 };
+	const uint8_t m_Enc1bReg{ 0x03 };
+	const uint8_t m_Enc1cReg{ 0x04 };
+	const uint8_t m_Enc1dReg{ 0x05 };
 
-	const unsigned char m_VoltageReg{ 0x0A };
-	const unsigned char m_Motor1CurrentReg{ 0x0B };
-	const unsigned char m_Motor2CurrentReg{ 0x0C };
+	const uint8_t m_Enc2aReg{ 0x06 };
+	const uint8_t m_Enc2bReg{ 0x07 };
+	const uint8_t m_Enc2cReg{ 0x08 };
+	const uint8_t m_Enc2dReg{ 0x09 };
 
-	const unsigned char m_SoftwareReg{ 0x0D };
-	
-	const unsigned char m_AccelerationReg{ 0x0E };
+	const uint8_t m_VoltageReg{ 0x0A };
+	const uint8_t m_Motor1CurrentReg{ 0x0B };
+	const uint8_t m_Motor2CurrentReg{ 0x0C };
 
-	const unsigned char m_ModeReg{ 0x10 };
+	const uint8_t m_SoftwareReg{ 0x0D };
+
+	const uint8_t m_AccelerationReg{ 0x0E };
+
+	const uint8_t m_ModeReg{ 0x10 };
 
 };
 
