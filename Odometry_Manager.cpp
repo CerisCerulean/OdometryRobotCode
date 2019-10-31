@@ -9,14 +9,14 @@ float MD25Controller::GetBatteryVoltage()
 	// GetBatteryVoltage() //
 	// Function to get battery voltage from MD25 //
 
-	Transmit(m_VoltageReg);			// Send batt volt command to MD25
-	Wire.requestFrom(m_MD25Address, 1);		// Request data from MD25
+	Transmit(m_VoltageReg);								// Send batt volt command to MD25
+	Wire.requestFrom(m_MD25Address, (uint8_t)1);		// Request data from MD25
 
-	while (Wire.available() < 1);			// Wait for data
+	while (Wire.available() < 1);						// Wait for data
 	
 	
 	float o_BatteryVolts = Wire.read();	
-	o_BatteryVolts = o_BatteryVolts / 10;
+	o_BatteryVolts = o_BatteryVolts / 10;				// Divide by 10 to get real value (1.d.p)
 
 	return o_BatteryVolts;
 }
@@ -36,12 +36,15 @@ float MD25Controller::GetMotorCurrent(const int i_Index)
 		Transmit(m_Motor2CurrentReg);
 	}
 	
-	Wire.requestFrom(m_MD25Address, 1);		// Request data from MD25
+	// NEEDS CHANGING TO PREVENT ERRORS WHEN MOTOR ISN'T 1 or 2
 
-	while (Wire.available() < 1);			// Wait for data
+
+	Wire.requestFrom(m_MD25Address, (uint8_t)1);		// Request data from MD25
+
+	while (Wire.available() < 1);						// Wait for data
 
 	float o_MotorCurrent = Wire.read();
-	o_MotorCurrent = o_MotorCurrent / 10;
+	o_MotorCurrent = o_MotorCurrent / 10;				// Divide by 10 to get real value (1.d.p)
 
 	return o_MotorCurrent;
 }
