@@ -4,6 +4,8 @@
 
 #include "Odometry_Manager.h"
 
+
+
 float MD25Controller::GetBatteryVoltage()
 {
 	// GetBatteryVoltage() //
@@ -170,3 +172,86 @@ void MD25Controller::SetMode(const uint8_t i_Mode)
 		// Do nothing
 	}
 }
+
+void OdometryController::Add_Move_Straight(float i_Distance, float i_SpeedModifier)
+{
+	// Create a ManeuverObject
+	ManeuverObject straightMoveObject;
+
+	// Setup ManeuverObject
+	straightMoveObject.m_MoveType = 0;
+	straightMoveObject.m_Distance = i_Distance;
+	straightMoveObject.m_SpeedModifier = i_SpeedModifier;
+
+	// Add ManeuverObject to vector
+	m_ManeuverVector.push_back(straightMoveObject);
+}
+
+void OdometryController::Add_Move_Turn(float i_Angle, float i_SpeedModifier)
+{
+	// Create a ManeuverObject
+	ManeuverObject turnMoveObject;
+
+	// Setup ManeuverObject
+	turnMoveObject.m_MoveType = 1;
+	turnMoveObject.m_Angle = i_Angle;
+	turnMoveObject.m_SpeedModifier = i_SpeedModifier;
+
+	// Add ManeuverObject to vector
+	m_ManeuverVector.push_back(turnMoveObject);
+}
+
+void OdometryController::Add_Move_Circle(float i_Radius, float i_Angle, float i_SpeedModifier)
+{
+	// Create a ManeuverObject
+	ManeuverObject circleMoveObject;
+
+	// Setup ManeuverObject
+	circleMoveObject.m_MoveType = 2;
+	circleMoveObject.m_Radius = i_Radius;
+	circleMoveObject.m_Angle = i_Angle;
+	circleMoveObject.m_SpeedModifier = i_SpeedModifier;
+
+	// Add ManeuverObject to vector
+	m_ManeuverVector.push_back(circleMoveObject);
+}
+
+void OdometryController::ExecutePath()
+{
+	// Itterate though the maneuver vector and execute each move
+	for (ManeuverObject currentMove : m_ManeuverVector)
+	{
+		if (currentMove.m_MoveType == STRAIGHT)
+		{
+			Move_Straight(currentMove);
+		}
+		else if (currentMove.m_MoveType == TURN)
+		{
+			Move_Turn(currentMove);
+		}
+		else if (currentMove.m_MoveType == CIRCLE)
+		{
+			Move_Circle(currentMove);
+		}
+
+	}
+}
+
+void OdometryController::Move_Straight(ManeuverObject)
+{
+	// Do straight move
+
+}
+
+void OdometryController::Move_Turn(ManeuverObject)
+{
+	// Do turn move
+
+}
+
+void OdometryController::Move_Circle(ManeuverObject)
+{
+	// Do circle move
+
+}
+

@@ -12,7 +12,34 @@
 #include <Wire.h>
 
 
-#include <vector.h>
+#include <ArduinoSTL.h>
+
+#define STRAIGHT 0
+#define TURN 1
+#define CIRCLE 2
+
+//#include <Adafruit_LEDBackpack.h>
+
+class ManeuverObject
+{
+public:
+	uint8_t m_MoveType{ STRAIGHT };		// Maneuver Type
+	// Straight = 0
+	// Turn = 1
+	// Circle = 2
+
+	float m_SpeedModifier{ 1 };	// Modifier for speed (All)
+	// 1 for 100% speed
+	// 0.5 for 50% speed
+
+	float m_Distance{ 0 };		// Distance of maneuver in cm (Straight)
+
+	float m_Radius{ 0 };			// Radius of maneuver in cm (Circle)
+
+	float m_Angle{ 0 };			// Angle of maneuver in degrees (Turn/Circle)
+
+	bool m_Clockwise{ true };		// Direction of turn (Turn)
+};
 
 // Class to allow for control and management MD25
 class MD25Controller
@@ -152,29 +179,26 @@ class OdometryController
 public:
 
 
-	void Add_Move_Straight();
-	void Add_Move_Turn();
-	void Add_Move_Circle();
+	void Add_Move_Straight(float i_Distance, float i_SpeedModifier);
+	void Add_Move_Turn(float i_Angle, float i_SpeedModifier);
+	void Add_Move_Circle(float i_Radius, float i_Angle, float i_SpeedModifier);
 
 	void ExecutePath();
-	
+	 
 
 private:
 
-	void Move_Straight(float i_Distance, float i_SpeedModifier);
-	void Move_Turn(float i_Angle, float i_SpeedModifier);
-	void Move_Circle(float i_Radius, float i_Angle);
+	void Move_Straight(ManeuverObject);
+	void Move_Turn(ManeuverObject);
+	void Move_Circle(ManeuverObject);
 
-	
+	std::vector<ManeuverObject> m_ManeuverVector;
 
 	// MD25 Controller Object member variable
 	MD25Controller* m_MD25 = new MD25Controller();
 
 };
 
-class ManeuverObject
-{
 
-};
 
 #endif
