@@ -70,23 +70,33 @@ public:
 
 		m_ModeReg(i_ModeReg)
 	{}
-
-
+	
+	///////////////////////////
+	// MD25 Member Variables //
+	///////////////////////////
 	float GetBatteryVoltage();
 
 	float GetMotorCurrent(int i_Index);
 
+
 	void Transmit(const unsigned char i_Command, const unsigned char i_Value);
 	void Transmit(const unsigned char i_Command);
 
+	void SetMotorSpeed(const uint8_t i_Motor, const uint8_t i_Speed);
+
 
 private:
+
+	///////////////////////////
+	// MD25 Member Variables //
+	///////////////////////////
+
 
 	int m_Mode{ 1 };
 
 	const unsigned char m_MD25Address{ 0x58 };
 
-	// Memory Registers in MD25 with default values from datasheet
+	// MD25 Control Registers
 
 	const uint8_t m_Speed1Reg{ 0x00 };
 	const uint8_t m_Speed2Reg{ 0x01 };
@@ -110,6 +120,15 @@ private:
 	const uint8_t m_AccelerationReg{ 0x0E };
 
 	const uint8_t m_ModeReg{ 0x10 };
+
+
+	// MD25 Special Command Registers
+
+	const uint8_t m_EncoderZeroReg{ 0x20 };
+	const uint8_t m_DisableSpeedRegulationReg{ 0x30 };
+	const uint8_t m_DisableSpeedRegulationReg{ 0x31 };
+	const uint8_t m_DisableMotorTimeoutReg{ 0x32 };
+	const uint8_t m_EnableMotorTimeoutReg{ 0x33 };
 
 };
 

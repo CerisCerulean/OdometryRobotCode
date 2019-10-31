@@ -60,3 +60,8 @@ void MD25Controller::Transmit(const unsigned char i_Command)
 	Wire.write(i_Command);
 	Wire.endTransmission();
 }
+
+void MD25Controller::SetMotorSpeed(const uint8_t i_Motor, const uint8_t i_Speed)
+{
+
+}
