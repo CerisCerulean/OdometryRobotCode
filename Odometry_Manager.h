@@ -13,7 +13,7 @@
 
 
 
-
+// Class to allow for control and management MD25
 class MD25Controller
 {
 public:
@@ -78,23 +78,36 @@ public:
 
 	float GetMotorCurrent(int i_Index);
 
+	void SetMotorSpeed(const uint8_t i_Motor, const uint8_t i_Speed);
+
+	void SetAccelerationValue(const uint8_t i_Acceleration);
+
+	void SetSpeedRegulation(const bool i_EnableSpeedRegulation);
+
+	void ResetEncoders();
+
+	float GetEncoderValue(const uint8_t i_Motor);
+
+private:
+
+	// MD25 Controller Private Commands
 
 	void Transmit(const unsigned char i_Command, const unsigned char i_Value);
 	void Transmit(const unsigned char i_Command);
 
-	void SetMotorSpeed(const uint8_t i_Motor, const uint8_t i_Speed);
-
-
-private:
 
 	///////////////////////////
 	// MD25 Member Variables //
 	///////////////////////////
 
+	// MD25 Controller Variables
 
 	int m_Mode{ 1 };
 
-	const unsigned char m_MD25Address{ 0x58 };
+	uint8_t m_AccelerationValue{ 5 };
+
+	// MD25 I2C Address
+	const uint8_t m_MD25Address{ 0x58 };
 
 	// MD25 Control Registers
 
@@ -126,7 +139,7 @@ private:
 
 	const uint8_t m_EncoderZeroReg{ 0x20 };
 	const uint8_t m_DisableSpeedRegulationReg{ 0x30 };
-	const uint8_t m_DisableSpeedRegulationReg{ 0x31 };
+	const uint8_t m_EnableSpeedRegulationReg{ 0x31 };
 	const uint8_t m_DisableMotorTimeoutReg{ 0x32 };
 	const uint8_t m_EnableMotorTimeoutReg{ 0x33 };
 

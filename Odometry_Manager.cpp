@@ -66,5 +66,90 @@ void MD25Controller::Transmit(const unsigned char i_Command)
 
 void MD25Controller::SetMotorSpeed(const uint8_t i_Motor, const uint8_t i_Speed)
 {
+	Transmit(m_AccelerationReg, m_AccelerationValue);
+
+	if (i_Motor == 1)
+	{
+		Transmit(m_Speed1Reg, i_Speed);
+	}
+	else if (i_Motor == 2)
+	{
+		Transmit(m_Speed2Reg, i_Speed);
+	}
+}
+
+void MD25Controller::SetAccelerationValue(const uint8_t i_Acceleration)
+{
+	// Sets the internal value of the acceleration to a given int
+
+	// The acceleration value cannot be less than 1
+	// The acceleration value cannot be more than 10
+
+	if (i_Acceleration <= 1)
+	{
+		m_AccelerationValue = 1;
+	}
+	else if (i_Acceleration >= 10)
+	{
+		m_AccelerationValue = 10;
+	}
+	else
+	{
+		m_AccelerationValue = i_Acceleration;
+	}
+}
+
+void MD25Controller::SetSpeedRegulation(const bool i_EnableSpeedRegulation)
+{
+	if (i_EnableSpeedRegulation == false)
+	{
+		Transmit(m_DisableSpeedRegulationReg);
+	}
+	else
+	{
+		Transmit(m_EnableSpeedRegulationReg);
+	}
+}
+
+void MD25Controller::ResetEncoders()
+{
+	Transmit(m_EncoderZeroReg);
+}
+
+float MD25Controller::GetEncoderValue(const uint8_t i_Motor)
+{
+	if (i_Motor != 1 || i_Motor != 2)
+	{
+		// We're trying to access a motor that doesn't exist
+		// Do nothing
+	}
+	else
+	{
+		// We're trying to read an existing motor
+		if (i_Motor == 1)
+		{
+			// We're trying to read motor 1
+			Transmit(m_Enc1aReg);
+		}
+		else
+		{
+			// We're trying to read motor 2
+			Transmit(m_Enc2aReg);
+		}
+
+		Wire.requestFrom(m_MD25Address, (uint8_t)4 );		// Request data from MD25
+		while (Wire.available() < 4);						// Wait for data
+		
+		uint32_t o_EncoderValue = Wire.read();
+
+		for (int i = 0; i <= 2; i++)						// Loop though 3 times to get each byte of data from MD25
+		{
+			o_EncoderValue <<= 8;
+			o_EncoderValue += Wire.read();
+		}
+
+		return o_EncoderValue;
+	}
+
 
 }
