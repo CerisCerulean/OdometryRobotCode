@@ -88,6 +88,8 @@ public:
 
 	float GetEncoderValue(const uint8_t i_Motor);
 
+	void SetMode(const uint8_t i_Mode);
+
 private:
 
 	// MD25 Controller Private Commands

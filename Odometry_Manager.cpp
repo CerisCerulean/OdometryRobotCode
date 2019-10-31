@@ -153,3 +153,20 @@ float MD25Controller::GetEncoderValue(const uint8_t i_Motor)
 
 
 }
+
+void MD25Controller::SetMode(const uint8_t i_Mode)
+{
+	if (i_Mode >= 0 || i_Mode <= 3)
+	{
+		// We are trying to send a valid mode
+
+		Transmit(m_ModeReg, i_Mode);
+		m_Mode = i_Mode;
+	}
+	else
+	{
+		// We are trying to send and invalid mode
+
+		// Do nothing
+	}
+}
