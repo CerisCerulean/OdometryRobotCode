@@ -12,14 +12,12 @@
 #include <Wire.h>
 
 
+#include <vector.h>
 
 // Class to allow for control and management MD25
 class MD25Controller
 {
 public:
-
-	// Default Empty Constructor
-	MD25Controller() {}
 
 	// Full Register Constructor for MD25Controller
 	MD25Controller
@@ -148,6 +146,35 @@ private:
 };
 
 
+// Class to manage high level functions of the robot
+class OdometryController
+{
+public:
+
+
+	void Add_Move_Straight();
+	void Add_Move_Turn();
+	void Add_Move_Circle();
+
+	void ExecutePath();
+	
+
+private:
+
+	void Move_Straight(float i_Distance, float i_SpeedModifier);
+	void Move_Turn(float i_Angle, float i_SpeedModifier);
+	void Move_Circle(float i_Radius, float i_Angle);
+
+	
+
+	// MD25 Controller Object member variable
+	MD25Controller* m_MD25 = new MD25Controller();
+
+};
+
+class ManeuverObject
+{
+
+};
 
 #endif
-

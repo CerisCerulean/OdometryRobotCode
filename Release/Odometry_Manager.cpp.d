@@ -13,4 +13,6 @@ C:\Users\James\AppData\Local\Temp\VMBuilds\FEEG1006_Odometry_Software\uno\Releas
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Arduino.h \
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\variants\standard/pins_arduino.h \
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\libraries\Wire\src/Wire.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Stream.h
+ C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Stream.h \
+ C:\Program\ Files\ (x86)\Arduino\libraries\Servo\src/Servo.h \
+ C:\Program\ Files\ (x86)\Arduino\libraries\Servo\src/avr/ServoTimers.h
