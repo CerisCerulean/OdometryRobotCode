@@ -1,10 +1,7 @@
-// 
-// 
-// 
-
 #include "Odometry_Manager.h"
 
-
+#define MOTOR1DIR 1
+#define MOTOR2DIR -1
 
 float MD25Controller::GetBatteryVoltage()
 {
@@ -51,7 +48,7 @@ float MD25Controller::GetMotorCurrent(const int i_Index)
 	return o_MotorCurrent;
 }
 
-void MD25Controller::Transmit(const unsigned char i_Command, const unsigned char i_Value)
+void MD25Controller::Transmit(const char i_Command, const char i_Value)
 {
 	Wire.beginTransmission(m_MD25Address);
 	Wire.write(i_Command);
@@ -59,14 +56,14 @@ void MD25Controller::Transmit(const unsigned char i_Command, const unsigned char
 	Wire.endTransmission();
 }
 
-void MD25Controller::Transmit(const unsigned char i_Command)
+void MD25Controller::Transmit(const char i_Command)
 {
 	Wire.beginTransmission(m_MD25Address);
 	Wire.write(i_Command);
 	Wire.endTransmission();
 }
 
-void MD25Controller::SetMotorSpeed(const uint8_t i_Motor, const uint8_t i_Speed)
+void MD25Controller::SetMotorSpeed(const uint8_t i_Motor, const int8_t i_Speed)
 {
 	Transmit(m_AccelerationReg, m_AccelerationValue);
 
@@ -142,15 +139,17 @@ float MD25Controller::GetEncoderValue(const uint8_t i_Motor)
 		Wire.requestFrom(m_MD25Address, (uint8_t)4 );		// Request data from MD25
 		while (Wire.available() < 4);						// Wait for data
 		
-		uint32_t o_EncoderValue = Wire.read();
+		int32_t encoderValue = Wire.read();
 
 		for (int i = 0; i <= 2; i++)						// Loop though 3 times to get each byte of data from MD25
 		{
-			o_EncoderValue <<= 8;
-			o_EncoderValue += Wire.read();
+			encoderValue <<= 8;
+			encoderValue += Wire.read();
 		}
 
-		return o_EncoderValue;
+		float o_EncoderDistance = encoderValue * 0.09;
+
+		return o_EncoderDistance;
 	}
 
 
@@ -179,7 +178,7 @@ void OdometryController::Add_Move_Straight(float i_Distance, float i_SpeedModifi
 	ManeuverObject straightMoveObject;
 
 	// Setup ManeuverObject
-	straightMoveObject.m_MoveType = 0;
+	straightMoveObject.m_MoveType = STRAIGHT;
 	straightMoveObject.m_Distance = i_Distance;
 	straightMoveObject.m_SpeedModifier = i_SpeedModifier;
 
@@ -193,7 +192,7 @@ void OdometryController::Add_Move_Turn(float i_Angle, float i_SpeedModifier)
 	ManeuverObject turnMoveObject;
 
 	// Setup ManeuverObject
-	turnMoveObject.m_MoveType = 1;
+	turnMoveObject.m_MoveType = TURN;
 	turnMoveObject.m_Angle = i_Angle;
 	turnMoveObject.m_SpeedModifier = i_SpeedModifier;
 
@@ -201,15 +200,16 @@ void OdometryController::Add_Move_Turn(float i_Angle, float i_SpeedModifier)
 	m_ManeuverVector.push_back(turnMoveObject);
 }
 
-void OdometryController::Add_Move_Circle(float i_Radius, float i_Angle, float i_SpeedModifier)
+void OdometryController::Add_Move_Circle(float i_Radius, float i_Angle, bool i_Clockwise, float i_SpeedModifier)
 {
 	// Create a ManeuverObject
 	ManeuverObject circleMoveObject;
 
 	// Setup ManeuverObject
-	circleMoveObject.m_MoveType = 2;
+	circleMoveObject.m_MoveType = CIRCLE;
 	circleMoveObject.m_Radius = i_Radius;
 	circleMoveObject.m_Angle = i_Angle;
+	circleMoveObject.m_Clockwise = i_Clockwise;
 	circleMoveObject.m_SpeedModifier = i_SpeedModifier;
 
 	// Add ManeuverObject to vector
@@ -237,21 +237,136 @@ void OdometryController::ExecutePath()
 	}
 }
 
-void OdometryController::Move_Straight(ManeuverObject)
+void OdometryController::clearPath()
 {
-	// Do straight move
+	m_ManeuverVector.clear();
+}
+
+void OdometryController::Move_Straight(ManeuverObject i_ManeuverObject)
+{
+	// Do straight line move
+	
+	// Set MD25 Mode to 1
+	m_MD25->SetMode(1);
+	
+	m_MD25->ResetEncoders();
+
+	m_MD25->SetAccelerationValue(5);
+
+	// Set motor speeds
+	m_MD25->SetMotorSpeed(1, i_ManeuverObject.m_SpeedModifier * 127 * MOTOR1DIR);
+	m_MD25->SetMotorSpeed(2, i_ManeuverObject.m_SpeedModifier * 127 * MOTOR2DIR);
+
+	float enc1 = m_MD25->GetEncoderValue(1);
+	float enc2 = m_MD25->GetEncoderValue(2);
+
+	float distanceToTarget1 = i_ManeuverObject.m_Distance - enc1 * MOTOR1DIR;
+	float distanceToTarget2 = i_ManeuverObject.m_Distance - enc2 * MOTOR2DIR;
+
+	bool withinSlowDistance = false;
+
+	while ((enc1 <= i_ManeuverObject.m_Distance) && (enc2 <= i_ManeuverObject.m_Distance))
+	{
+		// We should continue moving
+		distanceToTarget1 = i_ManeuverObject.m_Distance - enc1 * MOTOR1DIR;
+		distanceToTarget2 = i_ManeuverObject.m_Distance - enc2 * MOTOR2DIR;
+		// Check to see if we are within X units
+
+		if (withinSlowDistance == false)
+		{
+			if ((distanceToTarget1 <= m_SlowDistance) || (distanceToTarget2 <= m_SlowDistance))
+			{
+				withinSlowDistance = true;
+				// We are within the slow distance
+
+				// Switch to a slower value
+				m_MD25->SetAccelerationValue(5);
+
+				m_MD25->SetMotorSpeed(1, i_ManeuverObject.m_SpeedModifier * 127 * m_SlowModifier * MOTOR1DIR);
+				m_MD25->SetMotorSpeed(2, i_ManeuverObject.m_SpeedModifier * 127 * m_SlowModifier * -MOTOR2DIR);
+
+			}
+		}
+
+		// Update encoder values
+		enc1 = m_MD25->GetEncoderValue(1);
+		enc2 = m_MD25->GetEncoderValue(2);
+	}
+
+	// We are at the target!
+	Move_Stop();
 
 }
 
-void OdometryController::Move_Turn(ManeuverObject)
+void OdometryController::Move_Turn(ManeuverObject i_ManeuverObject)
 {
 	// Do turn move
 
+	float wheelTravelDistance = (i_ManeuverObject.m_Angle / 360) * 3.141 * m_WheelbaseDistance;
+
+	// Set MD25 Mode to 1
+	m_MD25->SetMode(1);
+
+	m_MD25->ResetEncoders();
+
+	m_MD25->SetAccelerationValue(5);
+
+	m_MD25->SetMotorSpeed(1, i_ManeuverObject.m_SpeedModifier * 127 * MOTOR1DIR);
+	m_MD25->SetMotorSpeed(2, i_ManeuverObject.m_SpeedModifier * 127 * -MOTOR2DIR);
+
+	float enc1 = m_MD25->GetEncoderValue(1);
+	float enc2 = m_MD25->GetEncoderValue(2);
+
+	float distanceToTarget1 = wheelTravelDistance - enc1 * MOTOR1DIR;
+	float distanceToTarget2 = wheelTravelDistance - enc2 * -MOTOR2DIR;
+
+	bool withinSlowDistance = false;
+
+	while ((enc1 <= i_ManeuverObject.m_Distance) && (enc2 <= i_ManeuverObject.m_Distance))
+	{
+		// We should continue moving
+		distanceToTarget1 = i_ManeuverObject.m_Distance - enc1 * MOTOR1DIR;
+		distanceToTarget2 = i_ManeuverObject.m_Distance - enc2 * -MOTOR2DIR;
+		// Check to see if we are within X units
+
+		if (withinSlowDistance == false)
+		{
+			if ((distanceToTarget1 <= m_SlowDistance) || (distanceToTarget2 <= m_SlowDistance))
+			{
+				withinSlowDistance = true;
+				// We are within the slow distance
+
+				// Switch to a slower value
+				m_MD25->SetAccelerationValue(5);
+
+				m_MD25->SetMotorSpeed(1, i_ManeuverObject.m_SpeedModifier * 127 * m_SlowModifier * MOTOR1DIR);
+				m_MD25->SetMotorSpeed(2, i_ManeuverObject.m_SpeedModifier * 127 * m_SlowModifier * -MOTOR2DIR);
+			}
+		}
+
+		// Update encoder values
+		enc1 = m_MD25->GetEncoderValue(1);
+		enc2 = m_MD25->GetEncoderValue(2);
+	}
+
+	// We are at the target!
+	Move_Stop();
+
+
 }
 
-void OdometryController::Move_Circle(ManeuverObject)
+void OdometryController::Move_Circle(ManeuverObject i_ManeuverObject)
 {
 	// Do circle move
 
+}
+
+void OdometryController::Move_Stop()
+{
+	// Set acceleration value to max to slow down as quck as possible
+	m_MD25->SetAccelerationValue(10);
+
+	m_MD25->SetMotorSpeed(1, 0);
+	m_MD25->SetMotorSpeed(2, 0);
 }
 

@@ -38,7 +38,7 @@ public:
 
 	float m_Angle{ 0 };			// Angle of maneuver in degrees (Turn/Circle)
 
-	bool m_Clockwise{ true };		// Direction of turn (Turn)
+	bool m_Clockwise{ true };		// Direction of turn (Circle)
 };
 
 // Class to allow for control and management MD25
@@ -101,9 +101,9 @@ public:
 	///////////////////////////
 	float GetBatteryVoltage();
 
-	float GetMotorCurrent(int i_Index);
+	float GetMotorCurrent(const int i_Index);
 
-	void SetMotorSpeed(const uint8_t i_Motor, const uint8_t i_Speed);
+	void SetMotorSpeed(const uint8_t i_Motor, const int8_t i_Speed);
 
 	void SetAccelerationValue(const uint8_t i_Acceleration);
 
@@ -119,8 +119,8 @@ private:
 
 	// MD25 Controller Private Commands
 
-	void Transmit(const unsigned char i_Command, const unsigned char i_Value);
-	void Transmit(const unsigned char i_Command);
+	void Transmit(const char i_Command, const char i_Value);
+	void Transmit(const char i_Command);
 
 
 	///////////////////////////
@@ -181,24 +181,26 @@ public:
 
 	void Add_Move_Straight(float i_Distance, float i_SpeedModifier);
 	void Add_Move_Turn(float i_Angle, float i_SpeedModifier);
-	void Add_Move_Circle(float i_Radius, float i_Angle, float i_SpeedModifier);
+	void Add_Move_Circle(float i_Radius, float i_Angle, bool i_Clockwise, float i_SpeedModifier);
 
 	void ExecutePath();
-	 
+	void clearPath();
 
 private:
 
-	void Move_Straight(ManeuverObject);
-	void Move_Turn(ManeuverObject);
-	void Move_Circle(ManeuverObject);
+	void Move_Straight(ManeuverObject i_ManeuverObject);
+	void Move_Turn(ManeuverObject i_ManeuverObject);
+	void Move_Circle(ManeuverObject i_ManeuverObject);
+
+	void Move_Stop();
 
 	std::vector<ManeuverObject> m_ManeuverVector;
 
 	// MD25 Controller Object member variable
 	MD25Controller* m_MD25 = new MD25Controller();
 
+	float m_SlowDistance{ 10 }; // The distance at which the robot should start slowing down in cm
+	float m_SlowModifier{ 0.2 };	// The percentage slow applied within the slow distance
+	float m_WheelbaseDistance{ 28 };	// The distance between the two wheels (Used in turning calculations)
 };
-
-
-
 #endif
