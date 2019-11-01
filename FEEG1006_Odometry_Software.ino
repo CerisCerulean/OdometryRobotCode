@@ -12,8 +12,6 @@ void setup()
 
 	OdometryController OdometryManager;
 
-	
-
 #ifdef ODOTRACK
 
 	OdometryManager.Add_Move_Straight(34, DEFAULTSPEED);		// Start -> 1
@@ -80,8 +78,4 @@ void setup()
 	OdometryManager.ExecutePath();
 }
 
-void loop()
-{
-
-
-}
+void loop() {}

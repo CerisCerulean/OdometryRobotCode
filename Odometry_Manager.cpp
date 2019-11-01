@@ -265,11 +265,10 @@ void OdometryController::Move_Straight(ManeuverObject i_ManeuverObject)
 
 	bool withinSlowDistance = false;
 
-	while ((enc1 <= i_ManeuverObject.m_Distance) && (enc2 <= i_ManeuverObject.m_Distance))
+	while ((distanceToTarget1 >= 0) && (distanceToTarget2 >= 0))
 	{
 		// We should continue moving
-		distanceToTarget1 = i_ManeuverObject.m_Distance - enc1 * MOTOR1DIR;
-		distanceToTarget2 = i_ManeuverObject.m_Distance - enc2 * MOTOR2DIR;
+		
 		// Check to see if we are within X units
 
 		if (withinSlowDistance == false)
@@ -291,6 +290,10 @@ void OdometryController::Move_Straight(ManeuverObject i_ManeuverObject)
 		// Update encoder values
 		enc1 = m_MD25->GetEncoderValue(1);
 		enc2 = m_MD25->GetEncoderValue(2);
+
+		distanceToTarget1 = i_ManeuverObject.m_Distance - enc1 * MOTOR1DIR;
+		distanceToTarget2 = i_ManeuverObject.m_Distance - enc2 * MOTOR2DIR;
+
 	}
 
 	// We are at the target!
@@ -322,11 +325,11 @@ void OdometryController::Move_Turn(ManeuverObject i_ManeuverObject)
 
 	bool withinSlowDistance = false;
 
-	while ((enc1 <= i_ManeuverObject.m_Distance) && (enc2 <= i_ManeuverObject.m_Distance))
+	while ((distanceToTarget1 >= 0) && (distanceToTarget2 >= 0))
 	{
 		// We should continue moving
-		distanceToTarget1 = i_ManeuverObject.m_Distance - enc1 * MOTOR1DIR;
-		distanceToTarget2 = i_ManeuverObject.m_Distance - enc2 * -MOTOR2DIR;
+
+
 		// Check to see if we are within X units
 
 		if (withinSlowDistance == false)
@@ -347,6 +350,10 @@ void OdometryController::Move_Turn(ManeuverObject i_ManeuverObject)
 		// Update encoder values
 		enc1 = m_MD25->GetEncoderValue(1);
 		enc2 = m_MD25->GetEncoderValue(2);
+
+		distanceToTarget1 = i_ManeuverObject.m_Distance - enc1 * MOTOR1DIR;
+		distanceToTarget2 = i_ManeuverObject.m_Distance - enc2 * -MOTOR2DIR;
+
 	}
 
 	// We are at the target!
@@ -358,15 +365,78 @@ void OdometryController::Move_Turn(ManeuverObject i_ManeuverObject)
 void OdometryController::Move_Circle(ManeuverObject i_ManeuverObject)
 {
 	// Do circle move
+	if (i_ManeuverObject.m_Radius > (m_WheelbaseDistance / 2))
+	{
+		float outsideTurnDistance = 2 * 3.141f * (i_ManeuverObject.m_Angle / 360) * (i_ManeuverObject.m_Radius + (m_WheelbaseDistance / 2));
+		float insideTurnDistance = 2 * 3.141f * (i_ManeuverObject.m_Angle / 360) * (i_ManeuverObject.m_Radius - (m_WheelbaseDistance / 2));
 
+		float motorSpeedRatio = insideTurnDistance / outsideTurnDistance;
+
+		float outsideTurnSpeed = i_ManeuverObject.m_SpeedModifier * 127;
+		float insideTurnSpeed = outsideTurnSpeed * motorSpeedRatio;
+
+		// Default outside motor to 1
+		uint8_t outsideMotor = 1;
+
+		// Default inside motor to 2
+		uint8_t insideMotor = 2;
+
+		int8_t outsideMotorDirection = MOTOR1DIR;
+		int8_t insideMotorDirection = MOTOR2DIR;
+
+		if (i_ManeuverObject.m_Clockwise == false)
+		{
+			// We're turning anti-clockwise instead
+			// Reverse motor defaults
+
+			outsideMotor = 2;
+			insideMotor = 1;
+			outsideMotorDirection = MOTOR2DIR;
+			insideMotorDirection = MOTOR1DIR;
+		}
+
+		m_MD25->SetMode(1);
+
+		m_MD25->ResetEncoders();
+
+		// Accelerate as fast as possible to get to set speed
+		m_MD25->SetAccelerationValue(10);
+
+		m_MD25->SetMotorSpeed(1, i_ManeuverObject.m_SpeedModifier * 127 * MOTOR1DIR);
+		m_MD25->SetMotorSpeed(2, i_ManeuverObject.m_SpeedModifier * 127 * MOTOR2DIR);
+
+		float encOutside = m_MD25->GetEncoderValue(outsideMotor);
+		float encInside = m_MD25->GetEncoderValue(insideMotor);
+
+		float distanceToTargetOutside = outsideTurnDistance - (encOutside * outsideMotorDirection);
+		float distanceToTargetInside = insideTurnDistance - (encInside * insideMotorDirection);
+		
+		float outsidePercentageRemaining = 0;
+		float insidePercentageRemaining = 0;
+
+		while ((distanceToTargetInside >= 0) && (distanceToTargetOutside >= 0))
+		{
+			// We should continue moving
+
+			encOutside = m_MD25->GetEncoderValue(outsideMotor);
+			encInside = m_MD25->GetEncoderValue(insideMotor);
+
+			distanceToTargetOutside = outsideTurnDistance - (encOutside * outsideMotorDirection);
+			distanceToTargetInside = insideTurnDistance - (encInside * insideMotorDirection);
+		}
+		Move_Stop();
+	}
 }
 
 void OdometryController::Move_Stop()
 {
+	m_MD25->SetMode(1);
+
 	// Set acceleration value to max to slow down as quck as possible
 	m_MD25->SetAccelerationValue(10);
 
 	m_MD25->SetMotorSpeed(1, 0);
 	m_MD25->SetMotorSpeed(2, 0);
 }
+
 

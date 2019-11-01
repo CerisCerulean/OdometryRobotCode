@@ -72,7 +72,7 @@ public:
 
 	uint8_t i_ModeReg = 0x10
 	): 
-		m_Speed1Reg(i_Speed1Reg),
+	m_Speed1Reg(i_Speed1Reg),
 		m_Speed2Reg(i_Speed2Reg),
 
 		m_Enc1aReg(i_Enc1aReg),
@@ -94,11 +94,12 @@ public:
 		m_AccelerationReg(i_AccelerationReg),
 
 		m_ModeReg(i_ModeReg)
-	{}
+	{};
 	
-	///////////////////////////
-	// MD25 Member Variables //
-	///////////////////////////
+	////////////////////////////
+	// MD25 Member Variables  //
+	////////////////////////////
+
 	float GetBatteryVoltage();
 
 	float GetMotorCurrent(const int i_Index);
