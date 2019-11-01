@@ -18,8 +18,6 @@
 #define TURN 1
 #define CIRCLE 2
 
-//#include <Adafruit_LEDBackpack.h>
-
 class ManeuverObject
 {
 public:
