@@ -306,16 +306,14 @@ void OdometryController::SetBuzzerPin(uint8_t i_BuzzerPin)
 
 void OdometryController::Move_DropIndicator(ManeuverObject i_ManeuverObject)
 {
-	Buzzer(200, 131);
 	SetServoPos(i_ManeuverObject.m_Angle);
 	delay(100);
-	Buzzer(200, 523);
 }
 
 void OdometryController::Move_Point()
 {
 	Buzzer(200, 131);
-	delay(100);
+	delay(50);
 	Buzzer(200, 523);
 }
 
