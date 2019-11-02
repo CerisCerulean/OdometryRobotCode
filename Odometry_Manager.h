@@ -10,13 +10,15 @@
 #endif
 
 #include <Wire.h>
-
+#include <Servo.h>
 
 #include <ArduinoSTL.h>
 
 #define STRAIGHT 0
 #define TURN 1
 #define CIRCLE 2
+#define POINT 3
+#define DROP 4
 
 class ManeuverObject
 {
@@ -182,22 +184,53 @@ public:
 	void Add_Move_Turn(float i_Angle, float i_SpeedModifier);
 	void Add_Move_Circle(float i_Radius, float i_Angle, bool i_Clockwise, float i_SpeedModifier);
 
+	void Add_DropIndicator(float i_Angle);
+	void Add_Point();
+
 	void ExecutePath();
 	void clearPath();
+
+	void SetServoPin(uint8_t i_ServoPin);
+
+	
+
+	void SetBuzzerPin(uint8_t i_BuzzerPin);
+
+	
+
+	void SetLEDPin(uint8_t i_LEDPin);
+
+	
 
 private:
 
 	void Move_Straight(ManeuverObject i_ManeuverObject);
 	void Move_Turn(ManeuverObject i_ManeuverObject);
 	void Move_Circle(ManeuverObject i_ManeuverObject);
+	void Move_Point();
+	void Move_DropIndicator(ManeuverObject i_ManeuverObject);
+	
+
+	void SetServoPos(float i_Angle);
 
 	void Move_Stop();
+
+	void Buzzer(float i_Duration, uint8_t i_Frequency);
+
+	void LED(bool i_State);
 
 	std::vector<ManeuverObject> m_ManeuverVector;
 
 	// MD25 Controller Object member variable
 	MD25Controller* m_MD25 = new MD25Controller();
 
+	Servo m_DropperServo;
+
+	uint8_t m_BuzzerPin{ NULL };
+
+	uint8_t m_LEDPin{ NULL };
+
+	// Movement variables
 	float m_SlowDistance{ 10 }; // The distance at which the robot should start slowing down in cm
 	float m_SlowModifier{ 0.2 };	// The percentage slow applied within the slow distance
 	float m_WheelbaseDistance{ 28 };	// The distance between the two wheels (Used in turning calculations)

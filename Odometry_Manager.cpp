@@ -216,6 +216,31 @@ void OdometryController::Add_Move_Circle(float i_Radius, float i_Angle, bool i_C
 	m_ManeuverVector.push_back(circleMoveObject);
 }
 
+void OdometryController::Add_Point()
+{
+	// Create a ManeuverObject
+	ManeuverObject pointObject;
+
+	// Setup ManeuverObject
+	pointObject.m_MoveType = POINT;
+
+	// Add ManeuverObject to vector
+	m_ManeuverVector.push_back(pointObject);
+}
+
+void OdometryController::Add_DropIndicator(float i_Angle)
+{
+	// Create a ManeuverObject
+	ManeuverObject dropObject;
+
+	// Setup ManeuverObject
+	dropObject.m_MoveType = DROP;
+	dropObject.m_Angle = i_Angle;
+
+	// Add ManeuverObject to vector
+	m_ManeuverVector.push_back(dropObject);
+}
+
 void OdometryController::ExecutePath()
 {
 	// Itterate though the maneuver vector and execute each move
@@ -233,13 +258,70 @@ void OdometryController::ExecutePath()
 		{
 			Move_Circle(currentMove);
 		}
-
+		else if (currentMove.m_MoveType == POINT)
+		{
+			Move_Point();
+		}
+		else if (currentMove.m_MoveType == DROP)
+		{
+			Move_DropIndicator(currentMove);
+		}
 	}
 }
 
 void OdometryController::clearPath()
 {
 	m_ManeuverVector.clear();
+}
+
+void OdometryController::SetServoPin(uint8_t i_ServoPin)
+{
+	if (m_DropperServo.attached() != true)
+	{
+		m_DropperServo.attach(i_ServoPin);
+	}
+}
+
+void OdometryController::SetServoPos(float i_Angle)
+{
+	if (m_DropperServo.attached() == true)
+	{
+		if (i_Angle < 0)
+		{
+			i_Angle = 0;
+		}
+		else if (i_Angle > 180)
+		{
+			i_Angle = 180;
+		}
+
+		m_DropperServo.write(i_Angle);
+	}
+}
+
+void OdometryController::SetBuzzerPin(uint8_t i_BuzzerPin)
+{
+	m_BuzzerPin = i_BuzzerPin;
+}
+
+void OdometryController::Move_DropIndicator(ManeuverObject i_ManeuverObject)
+{
+	Buzzer(200, 131);
+	SetServoPos(i_ManeuverObject.m_Angle);
+	delay(100);
+	Buzzer(200, 523);
+}
+
+void OdometryController::Move_Point()
+{
+	Buzzer(200, 131);
+	delay(100);
+	Buzzer(200, 523);
+}
+
+void OdometryController::SetLEDPin(uint8_t i_LEDPin)
+{
+	m_LEDPin = i_LEDPin;
 }
 
 void OdometryController::Move_Straight(ManeuverObject i_ManeuverObject)
@@ -437,6 +519,18 @@ void OdometryController::Move_Stop()
 
 	m_MD25->SetMotorSpeed(1, 0);
 	m_MD25->SetMotorSpeed(2, 0);
+}
+
+void OdometryController::Buzzer(float i_Duration, uint8_t i_Frequency)
+{
+	if (m_BuzzerPin != NULL)
+	{
+		tone(m_BuzzerPin, i_Frequency, i_Duration);
+	}
+}
+
+void OdometryController::LED(bool i_State)
+{
 }
 
 
