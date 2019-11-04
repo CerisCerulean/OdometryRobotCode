@@ -12,6 +12,10 @@ void setup()
 
 	OdometryController OdometryManager;
 
+	OdometryManager.SetBuzzerPin(8);
+	OdometryManager.SetServoPin(6);
+	OdometryManager.SetLEDPin(5);
+
 #ifdef ODOTRACK
 
 	OdometryManager.Add_Move_Straight(34, DEFAULTSPEED);		// Start -> 1

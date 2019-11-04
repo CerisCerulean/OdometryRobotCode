@@ -36,7 +36,7 @@ public:
 
 	float m_Radius{ 0 };			// Radius of maneuver in cm (Circle)
 
-	float m_Angle{ 0 };			// Angle of maneuver in degrees (Turn/Circle)
+	float m_Angle{ 0 };			// Angle of maneuver in degrees (Turn/Circle/Drop)
 
 	bool m_Clockwise{ true };		// Direction of turn (Circle)
 };
